@@ -1,7 +1,9 @@
-package com.mlr.gravitysnake;
+package com.mlr.gravitysnake.activities;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.mlr.gravitysnake.R;
 
 public class MainActivity extends AppCompatActivity {
 

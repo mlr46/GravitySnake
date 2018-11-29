@@ -1,6 +1,7 @@
 <resources>
-    <string name="app_name">GravitySnake</string>
+    <string name="app_name">Gravity Snake</string>
     <string name="welcome_message">Gravity Sssssnake</string>
-    <string name="apples_label">How many apples?</string>
+    <string name="apples_label">Number of apples:</string>
     <string name="go_btn">Go!</string>
+    <string name="restart_btn">Restart</string>
 </resources>
