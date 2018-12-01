@@ -45,6 +45,7 @@
     </LinearLayout>
 
     <com.mlr.gravitysnake.views.Grid
+        android:id="@+id/grid"
         android:background="@color/ColorGridBackground"
         style="@style/ItemWithPaddingAndNoTopMargin"
         android:layout_width="match_parent"
