@@ -94,6 +94,11 @@ public class Grid extends View {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
   }
 
+  @Override
+  public boolean performClick() {
+    return super.performClick();
+  }
+
   private void drawSnake(Canvas canvas) {
     for (Point point : snake.subList(1, snake.size())) {
       drawSnakeBodySquare(point, canvas);

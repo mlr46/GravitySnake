@@ -1,5 +1,7 @@
 package com.mlr.gravitysnake.activities;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -65,8 +67,9 @@ public class GravitySnakeActivity extends AppCompatActivity {
 
     grid.setOnTouchListener(new View.OnTouchListener() {
       @Override
-      public boolean onTouch(View v, MotionEvent event) {
-        return moveSnake(v, event);
+      public boolean onTouch(View view, MotionEvent event) {
+        view.performClick();
+        return moveSnake(view, event);
       }
     });
   }
@@ -156,13 +159,37 @@ public class GravitySnakeActivity extends AppCompatActivity {
       Point headOfSnake = snake.get(0);
       Point nextPoint = new Point(headOfSnake.getX() + 1, headOfSnake.getY());
 
-      snake.remove(sizeOfSnake - 1);
-      snake.add(0, nextPoint);
+      if (isOnGrid(nextPoint)) {
+        snake.remove(sizeOfSnake - 1);
+        snake.add(0, nextPoint);
+      } else {
+        showEndOfGame();
+      }
     }
 
     grid.postInvalidate();
     return true;
   }
 
-  private void showEndOfGame() {}
+  private boolean isOnGrid(Point point) {
+    return point.getX() >= 0 && point.getX() < screen.length
+      && point.getY() >= 0 && point.getY() < screen[0].length;
+  }
+
+  /**
+   * Announces the end of the game and returns to the main activity.
+   */
+  private void showEndOfGame() {
+    grid.setOnTouchListener(null);
+    AlertDialog alertDialog = new AlertDialog.Builder(this)
+      .setMessage("Game over")
+      .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+          finish();
+        }
+      })
+      .create();
+    alertDialog.show();
+  }
 }
