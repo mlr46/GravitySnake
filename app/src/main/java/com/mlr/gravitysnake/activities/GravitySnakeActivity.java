@@ -3,6 +3,8 @@ package com.mlr.gravitysnake.activities;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
@@ -60,6 +62,13 @@ public class GravitySnakeActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_gravity_snake);
     init();
+
+    grid.setOnTouchListener(new View.OnTouchListener() {
+      @Override
+      public boolean onTouch(View v, MotionEvent event) {
+        return moveSnake(v, event);
+      }
+    });
   }
 
   private void init() {
@@ -139,6 +148,20 @@ public class GravitySnakeActivity extends AppCompatActivity {
     } while (screen[positionX][positionY] != Cell.EMPTY);
 
     return new Point(positionX, positionY);
+  }
+
+  public boolean moveSnake(View view, MotionEvent event) {
+    if (event.getAction() == MotionEvent.ACTION_UP) {
+      int sizeOfSnake = snake.size();
+      Point headOfSnake = snake.get(0);
+      Point nextPoint = new Point(headOfSnake.getX() + 1, headOfSnake.getY());
+
+      snake.remove(sizeOfSnake - 1);
+      snake.add(0, nextPoint);
+    }
+
+    grid.postInvalidate();
+    return true;
   }
 
   private void showEndOfGame() {}
