@@ -8,7 +8,6 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.mlr.gravitysnake.models.Cell;
 import com.mlr.gravitysnake.models.Point;
 
 import java.util.List;
@@ -18,7 +17,8 @@ public class Grid extends View {
   private static final int SQUARE_SIZE = 20;
   private List<Point> snake;
   private Point apple;
-  private Paint snakePaint;
+  private Paint snakeHeadPaint;
+  private Paint snakeBodyPaint;
   private Paint applePaint;
   private Paint gridPaint;
   private boolean canDraw;
@@ -38,8 +38,11 @@ public class Grid extends View {
    */
   private void init() {
 
-    snakePaint = new Paint();
-    snakePaint.setColor(Color.GREEN);
+    snakeHeadPaint = new Paint();
+    snakeHeadPaint.setColor(Color.BLUE);
+
+    snakeBodyPaint = new Paint();
+    snakeBodyPaint.setColor(Color.GREEN);
 
     applePaint = new Paint();
     applePaint.setColor(Color.RED);
@@ -92,18 +95,24 @@ public class Grid extends View {
   }
 
   private void drawSnake(Canvas canvas) {
-    for (Point point : snake) {
-      drawSnakeSquare(point, canvas);
+    for (Point point : snake.subList(1, snake.size())) {
+      drawSnakeBodySquare(point, canvas);
     }
+    drawSnakeHeadSquare(snake.get(0), canvas);
   }
 
   private void drawApple(Canvas canvas) {
     drawAppleSquare(apple, canvas);
   }
 
-  private void drawSnakeSquare(Point point, Canvas canvas) {
-    canvas.drawRect(getRectangleToBeDrawn(point), snakePaint);
+  private void drawSnakeHeadSquare(Point point, Canvas canvas) {
+    canvas.drawRect(getRectangleToBeDrawn(point), snakeHeadPaint);
   }
+
+  private void drawSnakeBodySquare(Point point, Canvas canvas) {
+    canvas.drawRect(getRectangleToBeDrawn(point), snakeBodyPaint);
+  }
+
 
   private void drawAppleSquare(Point point, Canvas canvas) {
     canvas.drawRect(getRectangleToBeDrawn(point), applePaint);

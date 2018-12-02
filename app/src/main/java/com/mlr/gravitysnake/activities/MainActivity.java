@@ -25,7 +25,6 @@ public class MainActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     init();
-    addSeekBarListener();
   }
 
   private void init() {
@@ -33,11 +32,12 @@ public class MainActivity extends AppCompatActivity {
     applesTextView = findViewById(R.id.apples_tv);
 
     initializeSeekBar();
+    addSeekBarListener();
   }
 
   private void initializeSeekBar() {
-    applesChoice.setMax(MAX_NUMBER_OF_APPLES);
     applesChoice.setProgress(MIN_NUMBER_OF_APPLES);
+    applesChoice.setMax(MAX_NUMBER_OF_APPLES);
     updateDisplay();
   }
 
