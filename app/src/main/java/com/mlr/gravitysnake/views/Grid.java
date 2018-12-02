@@ -11,12 +11,22 @@ import android.view.View;
 import com.mlr.gravitysnake.models.Cell;
 import com.mlr.gravitysnake.models.Point;
 
+import java.util.List;
+
 public class Grid extends View {
 
-  private static final int SQUARE_SIZE = 5;
-  private Cell[][] screen;
+  private static final int SQUARE_SIZE = 20;
+  private List<Point> snake;
+  private Point apple;
   private Paint snakePaint;
   private Paint applePaint;
+  private Paint gridPaint;
+  private boolean canDraw;
+  private int xCellSize;
+  private int yCellSize;
+  private int pointCellSize;
+  private int xRes;
+  private int yRes;
 
   public Grid(Context context, AttributeSet attrs) {
     super(context, attrs);
@@ -33,10 +43,29 @@ public class Grid extends View {
 
     applePaint = new Paint();
     applePaint.setColor(Color.RED);
+
+    gridPaint = new Paint();
+    gridPaint.setColor(Color.BLACK);
   }
 
-  public void setScreen(Cell[][] screen) {
-    this.screen = screen;
+  public void setSnake(List<Point> snake) {
+    this.snake = snake;
+  }
+
+  public void setApple(Point apple) {
+    this.apple = apple;
+  }
+
+  public void setResolutionX(int xRes) {
+    this.xRes = xRes;
+  }
+
+  public void setResolutionY(int yRes) {
+    this.yRes = yRes;
+  }
+
+  public void setCanDraw() {
+    this.canDraw = true;
   }
 
   /**
@@ -48,39 +77,50 @@ public class Grid extends View {
   protected void onDraw(Canvas canvas) {
     super.onDraw(canvas);
 
-    drawScreen(canvas);
-  }
-
-  private void drawScreen(Canvas canvas) {
-    for (int i = 0; i < screen.length; i++) {
-      for (int j = 0; j < screen[0].length; j++) {
-        switch (screen[i][j]) {
-          case APPLE:
-            drawApple(new Point(i, j), canvas);
-            break;
-          case SNAKE:
-            drawSnake(new Point(i, j), canvas);
-            break;
-          case EMPTY: default:
-            break;
-        }
-      }
+    if (canDraw) {
+      this.xCellSize = getWidth() / xRes;
+      this.yCellSize = getHeight() / yRes;
+      this.pointCellSize = Math.max(xCellSize, yCellSize) * 2;
+      drawSnake(canvas);
+      drawApple(canvas);
     }
   }
 
-  private void drawApple(Point point, Canvas canvas) {
-    canvas.drawRect(getRectangleToBeDrawn(point), applePaint);
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
   }
 
-  private void drawSnake(Point point, Canvas canvas) {
+  private void drawSnake(Canvas canvas) {
+    for (Point point : snake) {
+      drawSnakeSquare(point, canvas);
+    }
+  }
+
+  private void drawApple(Canvas canvas) {
+    drawAppleSquare(apple, canvas);
+  }
+
+  private void drawSnakeSquare(Point point, Canvas canvas) {
     canvas.drawRect(getRectangleToBeDrawn(point), snakePaint);
   }
 
+  private void drawAppleSquare(Point point, Canvas canvas) {
+    canvas.drawRect(getRectangleToBeDrawn(point), applePaint);
+  }
+
+  /**
+   * TODO:: figure out how to have a proper square here by doing the math and get the biggest of both
+   * the xCell and the yCell to get a square.
+   * @param point
+   * @return
+   */
   private Rect getRectangleToBeDrawn(Point point) {
+
     return new Rect(
-      point.getX(),
-      point.getY(),
-      point.getX() + SQUARE_SIZE,
-      point.getY() + SQUARE_SIZE);
+      point.getX() * xCellSize,
+      point.getY() * yCellSize,
+      point.getX() * xCellSize + pointCellSize,
+      point.getY() * yCellSize + pointCellSize);
   }
 }

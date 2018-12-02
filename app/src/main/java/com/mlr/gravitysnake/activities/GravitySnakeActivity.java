@@ -3,6 +3,9 @@ package com.mlr.gravitysnake.activities;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +24,9 @@ import java.util.Random;
  *
  * There should be an apple randomly on the board where the snake is not.
  *
+ * We can decide on a cell size from here - then we create a grid essentially
+ * Then we draw a square that is twice the size of the cell size.
+ *
  * To do:
  * 1. learn how to do the body of the snake and how to make it move
  * The body of the snake is subsequent squares.
@@ -32,6 +38,9 @@ public class GravitySnakeActivity extends AppCompatActivity {
   private static final int SCREEN_X_RESOLUTION = 100;
   private static final int SCREEN_Y_RESOLUTION = 200;
 
+  // Should probably only send the snake and the apple to the view.
+
+  private static final int CELL_SIZE = 10; // half the size of the grid square size.
   private int gridHeight;
   private int gridWidth;
   private Random randomIntGenerator;
@@ -40,6 +49,7 @@ public class GravitySnakeActivity extends AppCompatActivity {
   private TextView apples_tv;
   private Cell[][] screen; // TODO:: need to decide on the size of a square, and for the squares to
   // be superimposed
+  private Grid grid;
   private List<Point> snake; // TODO: we should use a list because it keeps the order and we just want to
   // know where is the head and where is the tail of a snake
 
@@ -59,20 +69,16 @@ public class GravitySnakeActivity extends AppCompatActivity {
 
     Intent intent = getIntent();
     apples = intent.getIntExtra(EXTRA_APPLES_SIZE, 1);
-    initializeScreenSize();
+    grid = findViewById(R.id.grid);
+
     initializeScreen();
     initializeSnake();
     placeApple();
+    grid.setCanDraw();
   }
 
   private void updateDisplay() {
     apples_tv.setText(String.valueOf(apples));
-  }
-
-  private void initializeScreenSize() {
-    Grid grid = findViewById(R.id.grid);
-    gridHeight = grid.getMeasuredHeight();
-    gridHeight = grid.getMeasuredWidth();
   }
 
   /**
@@ -80,12 +86,18 @@ public class GravitySnakeActivity extends AppCompatActivity {
    * the first apple.
    */
   private void initializeScreen() {
+    gridWidth = SCREEN_X_RESOLUTION;
+    gridHeight = SCREEN_Y_RESOLUTION;
+
     screen = new Cell[gridWidth][gridHeight];
     for (int i = 0; i < gridWidth; i++) {
       for (int j = 0; j < gridHeight; j++) {
         screen[i][j] = Cell.EMPTY;
       }
     }
+
+    grid.setResolutionX(gridWidth);
+    grid.setResolutionY(gridHeight);
   }
 
   /**
@@ -93,8 +105,8 @@ public class GravitySnakeActivity extends AppCompatActivity {
    */
   private void initializeSnake() {
     snake = new ArrayList<>();
-    int xInitial = gridWidth / 2;
-    int yPosition = gridHeight / 2;
+    int xInitial = SCREEN_X_RESOLUTION / 2;
+    int yPosition = SCREEN_Y_RESOLUTION / 2;
 
     for (int i = 0; i < INITIAL_LENGTH_OF_SNAKE; i++) {
       int xPosition = xInitial + i;
@@ -102,6 +114,8 @@ public class GravitySnakeActivity extends AppCompatActivity {
       snake.add(snakePoint);
       screen[xPosition][yPosition] = Cell.SNAKE;
     }
+
+    grid.setSnake(snake);
   }
 
   private void placeApple() {
@@ -111,7 +125,7 @@ public class GravitySnakeActivity extends AppCompatActivity {
     }
 
     Point apple = findEmptySpotOnScreen();
-    screen[apple.getX()][apple.getY()] = Cell.APPLE;
+    grid.setApple(apple);
     apples--;
     updateDisplay();
   }
@@ -120,8 +134,8 @@ public class GravitySnakeActivity extends AppCompatActivity {
     int positionX;
     int positionY;
     do {
-      positionX = randomIntGenerator.nextInt(gridHeight);
-      positionY = randomIntGenerator.nextInt(gridWidth);
+      positionX = randomIntGenerator.nextInt(gridWidth);
+      positionY = randomIntGenerator.nextInt(gridHeight);
     } while (screen[positionX][positionY] != Cell.EMPTY);
 
     return new Point(positionX, positionY);

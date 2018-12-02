@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.mlr.gravitysnake.R;
 
@@ -14,6 +15,7 @@ import static com.mlr.gravitysnake.activities.GravitySnakeActivity.EXTRA_APPLES_
 public class MainActivity extends AppCompatActivity {
 
   private static final int MIN_NUMBER_OF_APPLES = 1;
+  private static final int MAX_NUMBER_OF_APPLES = 20;
   private int apples;
   private SeekBar applesChoice;
   private TextView applesTextView;
@@ -29,10 +31,12 @@ public class MainActivity extends AppCompatActivity {
   private void init() {
     applesChoice = findViewById(R.id.apples_size);
     applesTextView = findViewById(R.id.apples_tv);
+
     initializeSeekBar();
   }
 
   private void initializeSeekBar() {
+    applesChoice.setMax(MAX_NUMBER_OF_APPLES);
     applesChoice.setProgress(MIN_NUMBER_OF_APPLES);
     updateDisplay();
   }
@@ -41,6 +45,9 @@ public class MainActivity extends AppCompatActivity {
     applesChoice.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
       @Override
       public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        if (progress < MIN_NUMBER_OF_APPLES) {
+          progress = MIN_NUMBER_OF_APPLES;
+        }
         apples = progress;
         updateDisplay();
       }
@@ -66,4 +73,5 @@ public class MainActivity extends AppCompatActivity {
     intent.putExtra(EXTRA_APPLES_SIZE, apples);
     startActivity(intent);
   }
+
 }
