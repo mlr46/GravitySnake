@@ -3,6 +3,11 @@ package com.mlr.gravitysnake.activities;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Paint;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -40,7 +45,7 @@ import java.util.Set;
  * 1. learn how to do the body of the snake and how to make it move
  * The body of the snake is subsequent squares.
  */
-public class GravitySnakeActivity extends AppCompatActivity {
+public class GravitySnakeActivity extends AppCompatActivity implements SensorEventListener {
 
   public static final String EXTRA_APPLES_SIZE = "apples-size";
   private static final int INITIAL_LENGTH_OF_SNAKE = 10;
@@ -63,22 +68,59 @@ public class GravitySnakeActivity extends AppCompatActivity {
   private Grid grid;
   private List<Point> snake;
   private Direction direction;
+  private SensorManager sensorManager;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_gravity_snake);
+    sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
     init();
-
-    grid.setOnTouchListener(new View.OnTouchListener() {
-      @Override
-      public boolean onTouch(View view, MotionEvent event) {
-        view.performClick();
-        return moveSnake(view, event);
-      }
-    });
   }
 
+  @Override
+  protected void onResume() {
+    super.onResume();
+    sensorManager.registerListener(
+      this,
+      sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
+      SensorManager.SENSOR_DELAY_GAME);
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    sensorManager.unregisterListener(this);
+  }
+
+  @Override
+  public void onSensorChanged(SensorEvent event) {
+    if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
+      float xAxis = event.values[0] * 100 / SensorManager.GRAVITY_EARTH;
+      float yAxis = event.values[0] * 100 / SensorManager.GRAVITY_EARTH;
+      Direction nextDirection = getNextDirection(xAxis, yAxis);
+
+      if (WHERE_NEXT.get(direction).contains(nextDirection)) {
+        direction = nextDirection;
+      }
+      moveSnake();
+    }
+  }
+
+  private Direction getNextDirection(float xAxis, float yAxis) {
+    if (Math.abs(xAxis) >= Math.abs(yAxis)) {
+      return xAxis < 0 ? Direction.LEFT : Direction.RIGHT;
+    } else {
+      return yAxis < 0 ? Direction.DOWN : Direction.UP;
+    }
+  }
+
+  @Override
+  public void onAccuracyChanged(Sensor sensor, int accuracy) { }
+
+  /**
+   * Initializes the game.
+   */
   private void init() {
     randomIntGenerator = new Random();
 
@@ -159,36 +201,54 @@ public class GravitySnakeActivity extends AppCompatActivity {
     return new Point(positionX, positionY);
   }
 
-  public boolean moveSnake(View view, MotionEvent event) {
-    if (event.getAction() == MotionEvent.ACTION_UP) {
-      int sizeOfSnake = snake.size();
-      Point nextPoint = getNextPoint(snake);
+  private void moveSnake() {
+    int sizeOfSnake = snake.size();
+    Point nextPoint = getNextPoint(snake, direction);
 
-      if (isGameOver(nextPoint)) {
-        snake.remove(sizeOfSnake - 1);
-        snake.add(0, nextPoint);
+    if (isGameOver(nextPoint)) {
+      snake.remove(sizeOfSnake - 1);
+      snake.add(0, nextPoint);
 
-        if (isApple(nextPoint)) {
+      if (isApple(nextPoint)) {
 
-          // TODO:: do something here
-          // Eat the apple - i.e. grow bigger from the bum
-          // Show a new apple
-        }
-      } else {
-        showEndOfGame();
+        // TODO:: do something here
+        // Eat the apple - i.e. grow bigger from the bum
+        // Show a new apple
       }
+    } else {
+      showEndOfGame();
     }
-
-    grid.postInvalidate();
-    return true;
   }
+
+//  public boolean moveSnake(View view, MotionEvent event) {
+//    if (event.getAction() == MotionEvent.ACTION_UP) {
+//      int sizeOfSnake = snake.size();
+//      Point nextPoint = getNextPoint(snake, getNextDirection());
+//
+//      if (isGameOver(nextPoint)) {
+//        snake.remove(sizeOfSnake - 1);
+//        snake.add(0, nextPoint);
+//
+//        if (isApple(nextPoint)) {
+//
+//          // TODO:: do something here
+//          // Eat the apple - i.e. grow bigger from the bum
+//          // Show a new apple
+//        }
+//      } else {
+//        showEndOfGame();
+//      }
+//    }
+//
+//    grid.postInvalidate();
+//    return true;
+//  }
 
   private boolean isApple(Point nextPoint) {
     return screen[nextPoint.getX()][nextPoint.getY()] == Cell.APPLE;
   }
 
-  private Point getNextPoint(List<Point> snake) {
-    direction = getNextDirection();
+  private Point getNextPoint(List<Point> snake, Direction direction) {
     return new Point(
       snake.get(0).getX() + direction.getDeltaX(),
       snake.get(0).getY() + direction.getDeltaY());
@@ -223,7 +283,9 @@ public class GravitySnakeActivity extends AppCompatActivity {
    * Announces the end of the game and returns to the main activity.
    */
   private void showEndOfGame() {
+    sensorManager.unregisterListener(this);
     grid.setOnTouchListener(null);
+
     AlertDialog alertDialog = new AlertDialog.Builder(this)
       .setMessage("Game over")
       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
