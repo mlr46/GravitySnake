@@ -83,7 +83,7 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
     super.onResume();
     sensorManager.registerListener(
       this,
-      sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
+      sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
       SensorManager.SENSOR_DELAY_UI);
   }
 
@@ -95,9 +95,9 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
 
   @Override
   public void onSensorChanged(SensorEvent event) {
-    if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
-      float xAxis = event.values[0] * 100 / SensorManager.GRAVITY_EARTH;
-      float yAxis = event.values[1] * 100 / SensorManager.GRAVITY_EARTH;
+    if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+      float xAxis = event.values[0] * 100;
+      float yAxis = event.values[1] * 100;
       Direction nextDirection = getNextDirection(xAxis, yAxis);
 
       if (WHERE_NEXT.get(direction).contains(nextDirection)) {
@@ -233,21 +233,6 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
   }
 
   /**
-   * At the moment, we pick a random direction for the snake to go to.
-   * @return
-   */
-  private Direction getNextDirection() {
-
-    Set<Direction> possibleDirections = WHERE_NEXT.get(direction);
-    int index = randomIntGenerator.nextInt(possibleDirections.size());
-    Iterator<Direction> iter = possibleDirections.iterator();
-    for (int i = 0; i < index; i++) {
-      iter.next();
-    }
-    return iter.next();
-  }
-
-  /**
    * The game is over if the snake goes outside of the screen or eats itself.
    * @param point
    * @return
@@ -265,7 +250,7 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
     grid.setOnTouchListener(null);
 
     AlertDialog alertDialog = new AlertDialog.Builder(this)
-      .setMessage("Game over")
+      .setMessage("Game over!")
       .setPositiveButton("OK", new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialog, int which) {
