@@ -84,7 +84,7 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
     sensorManager.registerListener(
       this,
       sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
-      SensorManager.SENSOR_DELAY_NORMAL);
+      SensorManager.SENSOR_DELAY_UI);
   }
 
   @Override
