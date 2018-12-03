@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   private void initializeSeekBar() {
-    applesChoice.setProgress(MIN_NUMBER_OF_APPLES);
+    apples = MIN_NUMBER_OF_APPLES;
     applesChoice.setMax(MAX_NUMBER_OF_APPLES);
     updateDisplay();
   }
@@ -45,10 +45,7 @@ public class MainActivity extends AppCompatActivity {
     applesChoice.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
       @Override
       public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        if (progress < MIN_NUMBER_OF_APPLES) {
-          progress = MIN_NUMBER_OF_APPLES;
-        }
-        apples = progress;
+        apples = progress + MIN_NUMBER_OF_APPLES;
         updateDisplay();
       }
 

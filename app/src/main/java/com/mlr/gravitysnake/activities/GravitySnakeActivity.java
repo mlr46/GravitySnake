@@ -83,7 +83,7 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
     super.onResume();
     sensorManager.registerListener(
       this,
-      sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+      sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE),
       SensorManager.SENSOR_DELAY_UI);
   }
 
