@@ -95,7 +95,7 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
 
   @Override
   public void onSensorChanged(SensorEvent event) {
-    if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+    if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
       float xAxis = event.values[0] * 100;
       float yAxis = event.values[1] * 100;
       Direction nextDirection = getNextDirection(xAxis, yAxis);

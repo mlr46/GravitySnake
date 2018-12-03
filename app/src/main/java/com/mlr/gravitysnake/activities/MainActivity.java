@@ -32,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
     applesTextView = findViewById(R.id.apples_tv);
 
     initializeSeekBar();
+
+    // TODO:: no seekbar!
+    // It can just be one activity - maybe just put some instructions here and the go-button.
     addSeekBarListener();
   }
 
