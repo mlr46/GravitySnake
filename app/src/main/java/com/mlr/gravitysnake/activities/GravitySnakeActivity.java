@@ -271,8 +271,8 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
    * @return
    */
   private boolean isGameOver(Point point) {
-    return (point.getX() >= 0 && point.getX() < screen.length
-          && point.getY() >= 0 && point.getY() < screen[0].length) ||
+    return (point.getX() < 0 || point.getX() >= screen.length
+          && point.getY() < 0 || point.getY() >= screen[0].length) ||
       screen[point.getX()][point.getY()] == Cell.SNAKE;
   }
 
