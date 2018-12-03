@@ -135,8 +135,6 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
     applesEaten = 0;
     apples_tv = findViewById(R.id.apples_size);
 
-//    Intent intent = getIntent();
-//    apples = intent.getIntExtra(EXTRA_APPLES_SIZE, 1);
     grid = findViewById(R.id.grid);
 
     initializeScreen();
@@ -190,6 +188,7 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
   private void placeApple() {
     apple = findEmptySpotOnScreen();
     // TODO:: need to update the screen to show the new apple and to grow the current snake
+    screen[apple.getX()][apple.getY()] = Cell.APPLE;
     grid.setApple(apple);
     updateDisplay();
   }
@@ -228,7 +227,8 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
   }
 
   private boolean isApple(Point nextPoint) {
-    return screen[nextPoint.getX()][nextPoint.getY()] == Cell.APPLE;
+    return screen[nextPoint.getX()][nextPoint.getY()] == Cell.APPLE ||
+      (apple.getX() == nextPoint.getX() && apple.getY() == nextPoint.getY());
   }
 
   /**
@@ -271,9 +271,9 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
    * @return
    */
   private boolean isGameOver(Point point) {
-    return (point.getX() < 0 || point.getX() >= screen.length
-          && point.getY() < 0 || point.getY() >= screen[0].length) ||
-      screen[point.getX()][point.getY()] == Cell.SNAKE;
+    return (point.getX() < 0 || point.getX() >= SCREEN_X_RESOLUTION
+      || point.getY() < 0 || point.getY() >= SCREEN_Y_RESOLUTION
+      || screen[point.getX()][point.getY()] == Cell.SNAKE);
   }
 
   /**
