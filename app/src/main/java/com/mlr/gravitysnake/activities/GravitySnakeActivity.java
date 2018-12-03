@@ -84,7 +84,7 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
     sensorManager.registerListener(
       this,
       sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
-      SensorManager.SENSOR_DELAY_GAME);
+      SensorManager.SENSOR_DELAY_UI);
   }
 
   @Override
@@ -97,7 +97,7 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
   public void onSensorChanged(SensorEvent event) {
     if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
       float xAxis = event.values[0] * 100 / SensorManager.GRAVITY_EARTH;
-      float yAxis = event.values[0] * 100 / SensorManager.GRAVITY_EARTH;
+      float yAxis = event.values[1] * 100 / SensorManager.GRAVITY_EARTH;
       Direction nextDirection = getNextDirection(xAxis, yAxis);
 
       if (WHERE_NEXT.get(direction).contains(nextDirection)) {
@@ -108,10 +108,10 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
   }
 
   private Direction getNextDirection(float xAxis, float yAxis) {
-    if (Math.abs(xAxis) >= Math.abs(yAxis)) {
-      return xAxis < 0 ? Direction.LEFT : Direction.RIGHT;
+    if (Math.abs(xAxis) > Math.abs(yAxis)) {
+      return xAxis < 0 ? Direction.RIGHT : Direction.LEFT;
     } else {
-      return yAxis < 0 ? Direction.DOWN : Direction.UP;
+      return yAxis < 0 ? Direction.UP : Direction.DOWN;
     }
   }
 
@@ -218,31 +218,9 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
     } else {
       showEndOfGame();
     }
-  }
 
-//  public boolean moveSnake(View view, MotionEvent event) {
-//    if (event.getAction() == MotionEvent.ACTION_UP) {
-//      int sizeOfSnake = snake.size();
-//      Point nextPoint = getNextPoint(snake, getNextDirection());
-//
-//      if (isGameOver(nextPoint)) {
-//        snake.remove(sizeOfSnake - 1);
-//        snake.add(0, nextPoint);
-//
-//        if (isApple(nextPoint)) {
-//
-//          // TODO:: do something here
-//          // Eat the apple - i.e. grow bigger from the bum
-//          // Show a new apple
-//        }
-//      } else {
-//        showEndOfGame();
-//      }
-//    }
-//
-//    grid.postInvalidate();
-//    return true;
-//  }
+    grid.postInvalidate();
+  }
 
   private boolean isApple(Point nextPoint) {
     return screen[nextPoint.getX()][nextPoint.getY()] == Cell.APPLE;
