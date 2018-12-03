@@ -8,6 +8,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.support.constraint.solver.widgets.Snapshot;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.mlr.gravitysnake.R;
 import com.mlr.gravitysnake.models.Cell;
 import com.mlr.gravitysnake.models.Direction;
@@ -62,11 +64,18 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
   private int gridHeight;
   private int gridWidth;
   private Random randomIntGenerator;
+
+  /**
+   * Number of apples eaten so far
+   */
   private int apples;
+
+  private int applesEaten;
   private TextView apples_tv;
   private Cell[][] screen;
   private Grid grid;
   private List<Point> snake;
+  private Point apple;
   private Direction direction;
   private SensorManager sensorManager;
 
@@ -123,11 +132,11 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
    */
   private void init() {
     randomIntGenerator = new Random();
-
+    applesEaten = 0;
     apples_tv = findViewById(R.id.apples_size);
 
-    Intent intent = getIntent();
-    apples = intent.getIntExtra(EXTRA_APPLES_SIZE, 1);
+//    Intent intent = getIntent();
+//    apples = intent.getIntExtra(EXTRA_APPLES_SIZE, 1);
     grid = findViewById(R.id.grid);
 
     initializeScreen();
@@ -137,7 +146,7 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
   }
 
   private void updateDisplay() {
-    apples_tv.setText(String.valueOf(apples));
+    apples_tv.setText(String.valueOf(applesEaten));
   }
 
   /**
@@ -179,14 +188,9 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
   }
 
   private void placeApple() {
-    if (apples <= 0) {
-      showEndOfGame();
-      return;
-    }
-
-    Point apple = findEmptySpotOnScreen();
+    apple = findEmptySpotOnScreen();
+    // TODO:: need to update the screen to show the new apple and to grow the current snake
     grid.setApple(apple);
-    apples--;
     updateDisplay();
   }
 
@@ -205,16 +209,17 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
     int sizeOfSnake = snake.size();
     Point nextPoint = getNextPoint(snake, direction);
 
-    if (isGameOver(nextPoint)) {
-      snake.remove(sizeOfSnake - 1);
+    if (!isGameOver(nextPoint)) {
+      Point removed = snake.remove(sizeOfSnake - 1);
       snake.add(0, nextPoint);
 
-      if (isApple(nextPoint)) {
+      screen[removed.getX()][removed.getY()] = Cell.EMPTY;
+      screen[nextPoint.getX()][nextPoint.getY()] = Cell.SNAKE;
 
-        // TODO:: do something here
-        // Eat the apple - i.e. grow bigger from the bum
-        // Show a new apple
+      if (isApple(nextPoint)) {
+        eatAppleAndPlaceNextOne(nextPoint);
       }
+
     } else {
       showEndOfGame();
     }
@@ -224,6 +229,34 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
 
   private boolean isApple(Point nextPoint) {
     return screen[nextPoint.getX()][nextPoint.getY()] == Cell.APPLE;
+  }
+
+  /**
+   * When eating the apple, we increase the size of the snake.
+   * The moving snake would have already marked the new spot as having been a snake and we thus
+   * place the new apple somewhere else.
+   * @param currentApple
+   */
+  private void eatAppleAndPlaceNextOne(Point currentApple) {
+    increaseSnake();
+    applesEaten++;
+    placeApple();
+    updateDisplay();
+  }
+
+  /**
+   * We want to add a new square at the end of snake in the direction. To find the exact position of
+   * this new point, we can look at the current position and gets its inverse.
+   *
+   * e.g. if we are currently going up, then we should add a new point in the down position (otherwise,
+   * if we add it to the up position, it would clash with the previous to last element of the snake.)
+   */
+  private void increaseSnake() {
+    Point snakeTail = Iterables.getLast(snake);
+    Point eatenApple = new Point(
+      snakeTail.getX() - direction.getDeltaX(),
+      snakeTail.getY() - direction.getDeltaY());
+    snake.add(eatenApple);
   }
 
   private Point getNextPoint(List<Point> snake, Direction direction) {
