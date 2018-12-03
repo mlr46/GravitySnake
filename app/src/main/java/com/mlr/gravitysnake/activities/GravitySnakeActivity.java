@@ -83,7 +83,7 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
     super.onResume();
     sensorManager.registerListener(
       this,
-      sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE),
+      sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY),
       SensorManager.SENSOR_DELAY_UI);
   }
 
@@ -96,8 +96,8 @@ public class GravitySnakeActivity extends AppCompatActivity implements SensorEve
   @Override
   public void onSensorChanged(SensorEvent event) {
     if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
-      float xAxis = event.values[0] * 100;
-      float yAxis = event.values[1] * 100;
+      float xAxis = (event.values[0] * 100 / SensorManager.GRAVITY_EARTH);
+      float yAxis = (event.values[1] * 100 / SensorManager.GRAVITY_EARTH);
       Direction nextDirection = getNextDirection(xAxis, yAxis);
 
       if (WHERE_NEXT.get(direction).contains(nextDirection)) {
