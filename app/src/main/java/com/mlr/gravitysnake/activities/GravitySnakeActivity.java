@@ -7,20 +7,25 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.mlr.gravitysnake.R;
 import com.mlr.gravitysnake.models.Cell;
+import com.mlr.gravitysnake.models.Direction;
 import com.mlr.gravitysnake.models.Point;
 import com.mlr.gravitysnake.views.Grid;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * At all time, we must know where the snake is, and the snake should not have any white dots in
@@ -42,22 +47,22 @@ public class GravitySnakeActivity extends AppCompatActivity {
   private static final int SCREEN_X_RESOLUTION = 100;
   private static final int SCREEN_Y_RESOLUTION = 200;
 
-  // Should probably only send the snake and the apple to the view.
+  private static Map<Direction, Set<Direction>> WHERE_NEXT =
+    ImmutableMap.<Direction, Set<Direction>>of(
+      Direction.LEFT, ImmutableSet.of(Direction.LEFT, Direction.DOWN, Direction.UP),
+      Direction.RIGHT, ImmutableSet.of(Direction.RIGHT, Direction.DOWN, Direction.UP),
+      Direction.UP, ImmutableSet.of(Direction.UP, Direction.LEFT, Direction.RIGHT),
+      Direction.DOWN, ImmutableSet.of(Direction.DOWN, Direction.LEFT, Direction.RIGHT));
 
-  private static final int CELL_SIZE = 10; // half the size of the grid square size.
   private int gridHeight;
   private int gridWidth;
   private Random randomIntGenerator;
   private int apples;
-  private int applesLeft;
   private TextView apples_tv;
-  private Cell[][] screen; // TODO:: need to decide on the size of a square, and for the squares to
-  // be superimposed
+  private Cell[][] screen;
   private Grid grid;
-  private List<Point> snake; // TODO: we should use a list because it keeps the order and we just want to
-  // know where is the head and where is the tail of a snake
-
-  // TODO:: add an on-touch listener to make the snake move for testing.
+  private List<Point> snake;
+  private Direction direction;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +121,7 @@ public class GravitySnakeActivity extends AppCompatActivity {
    * Initially places the snake: we will place the snake at the middle of the screen each time.
    */
   private void initializeSnake() {
+    direction = Direction.LEFT;
     snake = new ArrayList<>();
     int xInitial = SCREEN_X_RESOLUTION / 2;
     int yPosition = SCREEN_Y_RESOLUTION / 2;
@@ -156,12 +162,18 @@ public class GravitySnakeActivity extends AppCompatActivity {
   public boolean moveSnake(View view, MotionEvent event) {
     if (event.getAction() == MotionEvent.ACTION_UP) {
       int sizeOfSnake = snake.size();
-      Point headOfSnake = snake.get(0);
-      Point nextPoint = new Point(headOfSnake.getX() + 1, headOfSnake.getY());
+      Point nextPoint = getNextPoint(snake);
 
-      if (isOnGrid(nextPoint)) {
+      if (isGameOver(nextPoint)) {
         snake.remove(sizeOfSnake - 1);
         snake.add(0, nextPoint);
+
+        if (isApple(nextPoint)) {
+
+          // TODO:: do something here
+          // Eat the apple - i.e. grow bigger from the bum
+          // Show a new apple
+        }
       } else {
         showEndOfGame();
       }
@@ -171,7 +183,38 @@ public class GravitySnakeActivity extends AppCompatActivity {
     return true;
   }
 
-  private boolean isOnGrid(Point point) {
+  private boolean isApple(Point nextPoint) {
+    return screen[nextPoint.getX()][nextPoint.getY()] == Cell.APPLE;
+  }
+
+  private Point getNextPoint(List<Point> snake) {
+    direction = getNextDirection();
+    return new Point(
+      snake.get(0).getX() + direction.getDeltaX(),
+      snake.get(0).getY() + direction.getDeltaY());
+  }
+
+  /**
+   * At the moment, we pick a random direction for the snake to go to.
+   * @return
+   */
+  private Direction getNextDirection() {
+
+    Set<Direction> possibleDirections = WHERE_NEXT.get(direction);
+    int index = randomIntGenerator.nextInt(possibleDirections.size());
+    Iterator<Direction> iter = possibleDirections.iterator();
+    for (int i = 0; i < index; i++) {
+      iter.next();
+    }
+    return iter.next();
+  }
+
+  /**
+   * The game is over if the snake goes outside of the screen or eats itself.
+   * @param point
+   * @return
+   */
+  private boolean isGameOver(Point point) {
     return point.getX() >= 0 && point.getX() < screen.length
       && point.getY() >= 0 && point.getY() < screen[0].length;
   }
